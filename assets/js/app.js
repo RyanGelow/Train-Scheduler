@@ -13,41 +13,68 @@ firebase.initializeApp(firebaseConfig);
 
 const database = firebase.database();
 
-
 let currentTime = $(`#time`).text(`${moment().format('h:mm')}`);
 
-let trainName = "";
-let currentStation = "";
-let firstTrainTime = "";
-let frequency = 0;
+let trainName = $(`#train-name`).val();
+// console.log("Train Name: " + trainName);
 
-let firstTrainTimeValue = moment().valueOf(firstTrainTime, 'hmm');
-let currentTimeValue = moment().valueOf()
+let currentStation = $(`#current-station`).val();
+// console.log("Current Station: " + currentStation);
 
-$(`#submit`).on('click', function() {
-  if($(`#train-name`).val() === "") {
-    $(`#train-name`).text("Please fill out form");
-    break;
-  }if($(`#current-station`).val() === "") {
-    $(`#current-station`).text("Please fill out form");
-    break;
-  }if($(`#train-time`).val() === "") {
-    $(`#train-time`).text("Please fill out form");
-    break;
-  }if($(`#train-frequency`).val() === "") {
-    $(`#train-frequency`).text("Please fill out form");
-    break;
+let firstTrainTime = $(`#train-time`).val();
+// console.log("1st Train Time: " + firstTrainTime);
+let frequency = $(`#train-frequency`).val();
+// console.log("Frequency: " + frequency);
+
+
+
+
+$(`#submit`).on('click', function(e) {
+  e.preventDefault();
+  if($(`#train-name`).val() === "" || $(`#current-station`).val() === "" || $(`#train-time`).val() === "" || $(`#train-frequency`).val() === "") {
+    $(`.if-error`).text("Add Train - Please fill out form in full");
   }else{
-  trainName = $(`#train-name`).val();
-  console.log(trainName);
-  currentStation = $(`#current-station`).val();
-  console.log(currentStation);
-  firstTrainTime = $(`#train-time`).val();
-  console.log(firstTrainTime);
-  frequency = $(`#train-frequency`).val();
-  console.log(frequency);
-  console.log(firstTrainTimeValue);
-  console.log(currentTimeValue);
+    let trainName = $(`#train-name`).val();
+    console.log(trainName);
+    let currentStation = $(`#current-station`).val();
+    console.log(currentStation);
+    let firstTrainTime = $(`#train-time`).val();
+    console.log(firstTrainTime);
+    let tFrequency = $(`#train-frequency`).val();
+    console.log(tFrequency);
+
+    let firstTrainTimeValue = moment(firstTrainTime, "h:mm").subtract(1, "years");
+    console.log("First Train Time Value: " + firstTrainTimeValue);
+    let currentTimeValue = moment()
+    console.log("Current Time Value: " + currentTimeValue);
+
+    
+    // Difference between the times
+    const diffTime = moment().diff(moment(firstTrainTimeValue), "minutes");
+    console.log("DIFFERENCE IN TIME: " + diffTime);
+
+    // Time apart (remainder)
+    const tRemainder = diffTime % tFrequency;
+    console.log(tRemainder);
+
+    // Minute Until Train
+    const minutesAway = tFrequency - tRemainder;
+    console.log("MINUTES TILL TRAIN: " + minutesAway);
+
+    // Next Train
+    const nextArrivalMoment = moment().add(minutesAway, "minutes");
+    const nextArrival = moment(nextArrivalMoment).format("hh:mm");
+    console.log("ARRIVAL TIME: " + nextArrival);
+
+    const $newTableRow = $('<tr>');
+    const $tTrainName = $('<td>').addClass("small").text(trainName);
+    const $cCurrentStation = $('<td>').addClass("small").text(currentStation);
+    const $fFrequency = $('<td>').addClass("small").text(tFrequency);
+    const $nNextArrival = $('<td>').addClass("small").text(nextArrival);
+    const $mMinutesAway = $('<td>').addClass("small").text(minutesAway);
+    
+    $newTableRow.append($tTrainName).append($cCurrentStation).append($fFrequency).append($nNextArrival).append($mMinutesAway)
+    $('.train-input').append($newTableRow);
   }
 });
 

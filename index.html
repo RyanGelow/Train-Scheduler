@@ -8,7 +8,6 @@
   
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <link rel="stylesheet" href="./assets/css/style.css">
-    <!-- <link rel="stylesheet" href="./assets/css/reset.css"> -->
     <!-- reset link -->
     <link rel="icon" href="https://cdn1.iconfinder.com/data/icons/materia-transport-vol-2/24/014_052_sign_railway_tram_train-512.png">
     <!-- FAVICON -->
@@ -27,6 +26,8 @@
             <h1 class="text-center">Train Scheduler</h1>
             <h3 class="text-center"></h3>
         </div>
+        
+        <!-- Train Scheduler -->
         <div class="jumbotron bg-dark text-white mb-2 d-flex justify-content-between mb-2 py-1">
             <div class="col
             ">
@@ -52,23 +53,21 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-sm-12 col-md-4">
-                                <img class="img-fluid thumbnail center-block" src="https://i.ytimg.com/vi/2zR2pLAGpoM/maxresdefault.jpg" alt="FAST TRAIN">
+                            <div class="col-md-12 col-lg-4">
+                                <img class="img-fluid thumbnail center-block mb-1 justify-content-center" src="https://i.ytimg.com/vi/2zR2pLAGpoM/maxresdefault.jpg" alt="FAST TRAIN">
                             </div>
-                            <div class="col-sm-12 col-md-8">
-                                <div class="row">
-                                    <table>
-                                        <thead>
-                                            <th class="col small font-weight-bold">Train Name</th>
-                                            <th class="col small font-weight-bold">Current Station</th>
-                                            <th class="col small font-weight-bold">Frequency (min)</th>
-                                            <th class="col small font-weight-bold">Next Arrival</th>
-                                            <th class="col small font-weight-bold">Minutes Away</th>
-                                        </thead>
-                                        <tbody>
-                                        </tbody>
-                                    </table>
-                                </div>
+                            <div class="panel-body">
+                                <table class="table table-hover" id="train-table">
+                                    <thead>
+                                        <th class="small font-weight-bold">Train Name</th>
+                                        <th class="small font-weight-bold">Current Station</th>
+                                        <th class="small font-weight-bold">Frequency (min)</th>
+                                        <th class="small font-weight-bold">Next Arrival</th>
+                                        <th class="small font-weight-bold">Minutes Away</th>
+                                    </thead>
+                                    <tbody class="train-input">
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -79,7 +78,7 @@
         <div class="row mb-2">
             <div class="col-lg-12">
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header if-error">
                         Add Train
                     </div>
                     <div class="card-body">
