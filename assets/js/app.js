@@ -13,19 +13,113 @@ firebase.initializeApp(firebaseConfig);
 
 const database = firebase.database();
 
-let currentTime = $(`#time`).text(`${moment().format('h:mm')}`);
+const currentTime = $(`#time`).text(`${moment().format('h:mm')}`);
 
-let trainName = $(`#train-name`).val();
+const trainName = $(`#train-name`).val();
 // console.log("Train Name: " + trainName);
 
-let currentStation = $(`#current-station`).val();
+const currentStation = $(`#current-station`).val();
 // console.log("Current Station: " + currentStation);
 
-let firstTrainTime = $(`#train-time`).val();
+const firstTrainTime = $(`#train-time`).val();
 // console.log("1st Train Time: " + firstTrainTime);
-let frequency = $(`#train-frequency`).val();
+const frequency = $(`#train-frequency`).val();
 // console.log("Frequency: " + frequency);
 
+// At the initial load and subsequent value changes, get a snapshot of the stored data. Real-time update when the firebase database changes.
+database.ref("/schedules/").on("value", function(snapshot) {
+  console.log(snapshot.val());
+  const schedules = snapshot.val()
+
+  // for( let key in snapshot.val() ) {
+  //   console.log(key)
+  // }
+  const result = Object.keys( snapshot.val() )
+  console.log( result )
+
+  result.forEach( key => {
+    console.log(schedules[key])
+    let trainNames = schedules[key].trainName;
+    let currentStations = schedules[key].currentStation;
+    let firstTrainTimes = schedules[key].firstTrainTime;
+    let frequencies = schedules[key].frequency;
+
+    // Comparable value for first train's time 
+    let firstTrainTimeValue = moment(firstTrainTimes, "h:mm").subtract(1, "years");
+    
+    // Difference between the times
+    const diffTime = moment().diff(moment(firstTrainTimeValue), "minutes");
+    
+    // Time apart (remainder)
+    const tRemainder = diffTime % frequencies;
+    
+    // Minute Until Train
+    const minutesAway = frequencies - tRemainder;
+    
+    // Next Train
+    const nextArrivalMoment = moment().add(minutesAway, "minutes");
+    const nextArrival = moment(nextArrivalMoment).format("hh:mm");
+    
+    const $newTableRow = $('<tr>');
+    const $tTrainName = $('<td>').addClass("small").text(trainNames);
+    const $cCurrentStation = $('<td>').addClass("small").text(currentStations);
+    const $fFrequency = $('<td>').addClass("small").text(frequencies);
+    const $nNextArrival = $('<td>').addClass("small").text(nextArrival);
+    const $mMinutesAway = $('<td>').addClass("small").text(minutesAway);
+    
+    $newTableRow.append($tTrainName).append($cCurrentStation).append($fFrequency).append($nNextArrival).append($mMinutesAway)
+    $('.train-input').append($newTableRow);
+  
+  } )
+
+
+
+  // If Firebase has a highPrice and highBidder stored, update our client-side variables
+  // if (snapshot.child("trainName").exists() && snapshot.child("currentStation").exists() && snapshot.child("firstTrainTime").exists() && snapshot.child("frequency").exists()) {
+    
+    // If Firebase does not have any train values stored, they remain the same as the values we set when we initialized the variables.
+    // In either case, we want to log the values to console and display them on the page.
+    
+    /*
+    database.train-schedule-b14a9.forEach(function(trainName, currentStation, firstTrainTime, frequency) {
+      let trainNames = snapshot.val().trainName;
+      let currentStations = snapshot.val().currentStation;
+      let firstTrainTimes = snapshot.val().firstTrainTime;
+      let frequencies = snapshot.val().frequency;
+      
+      // Comparable value for first train's time 
+      let firstTrainTimeValue = moment(firstTrainTimes, "h:mm").subtract(1, "years");
+    
+      // Difference between the times
+      const diffTime = moment().diff(moment(firstTrainTimeValue), "minutes");
+      
+      // Time apart (remainder)
+      const tRemainder = diffTime % frequencies;
+      
+      // Minute Until Train
+      const minutesAway = frequencies - tRemainder;
+      
+      // Next Train
+      const nextArrivalMoment = moment().add(minutesAway, "minutes");
+      const nextArrival = moment(nextArrivalMoment).format("hh:mm");
+      
+      const $newTableRow = $('<tr>');
+      const $tTrainName = $('<td>').addClass("small").text(trainNames);
+      const $cCurrentStation = $('<td>').addClass("small").text(currentStations);
+      const $fFrequency = $('<td>').addClass("small").text(frequencies);
+      const $nNextArrival = $('<td>').addClass("small").text(nextArrival);
+      const $mMinutesAway = $('<td>').addClass("small").text(minutesAway);
+      
+      $newTableRow.append($tTrainName).append($cCurrentStation).append($fFrequency).append($nNextArrival).append($mMinutesAway)
+      $('.train-input').append($newTableRow);
+    })
+    */
+
+
+// If any errors are experienced, log them to console.
+},function(errorObject) {
+  console.log("The read failed: " + errorObject.code);
+});
 
 
 
@@ -42,6 +136,27 @@ $(`#submit`).on('click', function(e) {
     console.log(firstTrainTime);
     let tFrequency = $(`#train-frequency`).val();
     console.log(tFrequency);
+
+    // database.ref().set({
+    //   trainName: trainName,
+    //   currentStation: currentStation,
+    //   firstTrainTime: firstTrainTime,
+    //   frequency: tFrequency
+    // });
+
+    var newKey = database.ref().child('schedules').push().key;
+
+    // Write the new post's data simultaneously in the posts list and the user's post list.
+    var updates = {};
+    updates['/schedules/' + newKey] = {
+      trainName: trainName,
+      currentStation: currentStation,
+      firstTrainTime: firstTrainTime,
+      frequency: tFrequency
+    };
+
+    database.ref().update(updates);
+
 
     let firstTrainTimeValue = moment(firstTrainTime, "h:mm").subtract(1, "years");
     console.log("First Train Time Value: " + firstTrainTimeValue);
@@ -77,30 +192,6 @@ $(`#submit`).on('click', function(e) {
     $('.train-input').append($newTableRow);
   }
 });
-
-// could be 123 for 1:23 or 1234 for 12:34 HH:mm is military time
-// parseInt(moment('12:34','HH:mm').format('hmm')); === 1234
-
-
-// let firstTrainTimeFormat = moment("hmm").format("HH:mm")
-// let firstTrainTimeValue = moment().valueOf(firstTrainTime, 'hmm');
-// let currentTimeFormat = moment().format('HH:mm');
-// let currentTimeValue = moment().valueOf()
-// let nextArrival = (currentTimeValue - firstTrainTimeValue)/frequency 
-// let minutesAway = 
-
-
-// database.ref().on("value", function(snapshot) {
-//     if (snapshot.child("trainName").exists() && snapshot.child("destination").exists() && snapshot.child("firstTrainTime").exists() && snapshot.child("frequency").exists()) {
-
-//         trainName = snapshot.val().trainTime;
-//         destination = snapshot.val().destination;
-//         frequency = snapshot.val().frequency;
-//         firstTrainTime = snapshot.val().firstTrainTime;
-//         nextArrival = trainName
-
-//     }
-// })
 
 
 
