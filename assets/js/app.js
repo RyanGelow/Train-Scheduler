@@ -53,7 +53,7 @@ $(`#submit`).on('click', function(e) {
 
 // At the initial load and subsequent value changes, get a snapshot of the stored data. Real-time update when the firebase database changes.
 database.ref("/schedules/").on("value", function(snapshot) {
-  console.log(snapshot.val());
+  // console.log(snapshot.val());
   const schedules = snapshot.val()
 
   // for( let key in snapshot.val() ) {
@@ -61,13 +61,14 @@ database.ref("/schedules/").on("value", function(snapshot) {
   // }
   if (schedules) {
     const result = Object.keys(snapshot.val());
-    console.log(result);
+    // console.log(result);
     
-    
+    $('.train-input').empty();
+
     // If Firebase does not have any train values stored, they remain the same as the values we set when we initialized the variables. In either case, we want to log the values to console and display them on the page.
     
     result.forEach( key => {
-      console.log(schedules[key])
+      // console.log(schedules[key])
       let trainNames = schedules[key].trainName;
       let currentStations = schedules[key].currentStation;
       let firstTrainTimes = schedules[key].firstTrainTime;
@@ -93,23 +94,27 @@ database.ref("/schedules/").on("value", function(snapshot) {
       const $nNextArrival = $('<td>').addClass("small").text(nextArrival);
       const $mMinutesAway = $('<td>').addClass("small").text(minutesAway);
       const $close = $('<td>').addClass("small py-2 px-1")
-      const $closeButton = $(`<button>`).attr('type', 'button').addClass(`btn btn-outline-dark btn-sm closer`).text(`X`);
+      const $closeButton = $(`<button>`).attr({
+        'type': 'button',
+        'data-key': key
+        }
+      ).addClass(`btn btn-outline-dark btn-sm closer`).text(`X`);
       
       $close.append($closeButton);
       $newTableRow.append($tTrainName).append($cCurrentStation).append($fFrequency).append($nNextArrival).append($mMinutesAway).append($close);
       $('.train-input').append($newTableRow);
       
-      $(`.closer`).on(`click`, function() {
-        database.ref().child('schedules').remove(this.key);
-        location.reload();
-      })     
+
     })
   }
   // If any errors are experienced, log them to console.
 },function(errorObject) {
-  console.log("The read failed: " + errorObject.code);
+  // console.log("The read failed: " + errorObject.code);
 });
   
 
 
-
+$(document).on(`click`, `.closer`, function() {
+  // console.log($(this).attr("data-key"));
+  database.ref('/schedules/' + $(this).attr("data-key")).remove();
+})     
